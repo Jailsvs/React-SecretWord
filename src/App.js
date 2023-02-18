@@ -21,12 +21,13 @@ function App() {
   const [gameStage, setGameStage] = useState(stages[0].name)
   const [words] = useState(wordsList)
   
+  const guessesAmount = 3
   const [pickedWord, setPicketWord] = useState("")
   const [pickedCategory, setPicketCategory] = useState("")
   const [letters, setLetters] = useState([])
   const [guessedLetters, setGuessedLetters] = useState([])
   const [wrongLetters, setWrongLetters] = useState([])
-  const [guesses, setGuesses] = useState(3)
+  const [guesses, setGuesses] = useState(guessesAmount)
   const [score, setScore] = useState(0)
 
   const pickWordAndCategory = () => {
@@ -34,6 +35,7 @@ function App() {
     const category = categories[Math.floor(Math.random() * Object.keys(categories).length)]
     
     const word = words[category][Math.floor(Math.random() * Object.keys(words[category]).length)]
+    console.log(word)
     return {word, category}
   }
 
@@ -48,11 +50,43 @@ function App() {
     setGameStage(stages[1].name)
   }
 
-  const verifyLetter = () => {
-    setGameStage(stages[2].name)
+  const verifyLetter = (letter) => {
+    console.log(letter)
+    const normalizedLetter = letter.toLowerCase()
+
+    if (guessedLetters.includes(normalizedLetter)
+        || wrongLetters.includes(normalizedLetter))
+        {
+          return;
+        }
+
+    if (letters.includes(normalizedLetter))
+    {
+       setGuessedLetters((guessedLetters) => 
+                        [...guessedLetters, normalizedLetter]) 
+    }else {
+      setWrongLetters((wrongLetters) => 
+                      [...wrongLetters, normalizedLetter]) 
+      setGuesses(guesses-1)
+    }
   }
 
+  const clearLetterStates = () => {
+    setGuessedLetters([])
+    setWrongLetters([])
+  }
+
+  useEffect(() => {
+    if (guesses <= 0)
+    {
+      clearLetterStates()
+      setGameStage(stages[2].name)
+    }
+  }, [guesses])
+
   const retry = () => {
+    setScore(0)
+    setGuesses(guessesAmount)
     setGameStage(stages[0].name)
   }
 
